@@ -59,9 +59,7 @@ def register():
 def dashboard():
     return render_template('dashboard.html')
 
-@main_bp.route('/lessons')
-def lessons():
-    return render_template('lessons.html')
+
 
 @main_bp.route('/diagnostic')
 def diagnostic():
