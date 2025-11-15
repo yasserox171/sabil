@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - مركز Focus{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>لوحة التحكم</h2>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">الدروس المكتملة</h5>
+                        <p class="card-text display-6">3</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">الاختبارات</h5>
+                        <p class="card-text display-6">2</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>التحدي القادم</h5>
+            </div>
+            <div class="card-body">
+                <p>اختبار الرياضيات - المستوى المتوسط</p>
+                <a href="{{ url_for('main.diagnostic') }}" class="btn btn-primary">ابدأ الآن</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}الدروس - مركز Focus{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary">📚 مكتبة الدروس</h1>
+            <p class="text-muted">اختر المادة والمستوى لمشاهدة الدروس المتاحة</p>
+        </div>
+    </div>
+
+    <!-- فلترة الدروس -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select class="form-select" id="subjectFilter">
+                <option value="">جميع المواد</option>
+                <option value="الرياضيات">الرياضيات</option>
+                <option value="الفيزياء">الفيزياء</option>
+                <option value="اللغة العربية">اللغة العربية</option>
+                <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="gradeFilter">
+                <option value="">جميع المستويات</option>
+                <option value="1ac">الإعدادي 1</option>
+                <option value="2ac">الإعدادي 2</option>
+                <option value="3ac">الإعدادي 3</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control" id="searchInput" placeholder="ابحث في الدروس...">
+        </div>
+    </div>
+
+    <!-- قائمة الدروس -->
+    <div class="row" id="lessonsContainer">
+        {% for lesson in lessons %}
+        <div class="col-lg-4 col-md-6 mb-4 lesson-card" 
+             data-subject="{{ lesson.subject }}" 
+             data-grade="{{ lesson.grade_level }}"
+             data-title="{{ lesson.title.lower() }}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <!-- أيقونة المادة -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary">{{ lesson.subject }}</span>
+                        <small class="text-muted">{{ lesson.duration }}</small>
+                    </div>
+                    
+                    <!-- عنوان الدرس -->
+                    <h5 class="card-title">{{ lesson.title }}</h5>
+                    
+                    <!-- وصف الدرس -->
+                    <p class="card-text text-muted">{{ lesson.description }}</p>
+                    
+                    <!-- معلومات إضافية -->
+                    <div class="lesson-info mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-graduation-cap"></i>
+                            {% if lesson.grade_level == '1ac' %}الإعدادي 1
+                            {% elif lesson.grade_level == '2ac' %}الإعدادي 2
+                            {% elif lesson.grade_level == '3ac' %}الإعدادي 3
+                            {% else %}{{ lesson.grade_level }}{% endif %}
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- أزرار التنفيذ -->
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        {% if lesson.video_url %}
+                        <button class="btn btn-primary watch-video-btn" 
+                                data-video="{{ lesson.video_url }}"
+                                data-title="{{ lesson.title }}">
+                            <i class="fas fa-play-circle"></i> مشاهدة الفيديو
+                        </button>
+                        {% endif %}
+                        
+                        {% if lesson.document_url %}
+                        <a href="{{ lesson.document_url }}" class="btn btn-outline-secondary" target="_blank">
+                            <i class="fas fa-file-pdf"></i> تحميل الملخص
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">لا توجد دروس متاحة حالياً</h4>
+                <p class="text-muted">سيتم إضافة الدروس قريباً</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- مشغل الفيديو Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoModalTitle">مشاهدة الدرس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="lessonVideo" controls width="100%" style="max-height: 70vh;">
+                    <source id="videoSource" src="" type="video/mp4">
+                    متصفحك لا يدعم تشغيل الفيديو.
+                </video>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// فلترة الدروس
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const gradeFilter = document.getElementById('gradeFilter');
+    const searchInput = document.getElementById('searchInput');
+    const lessonCards = document.querySelectorAll('.lesson-card');
+    
+    function filterLessons() {
+        const subjectValue = subjectFilter.value;
+        const gradeValue = gradeFilter.value;
+        const searchValue = searchInput.value.toLowerCase();
+        
+        lessonCards.forEach(card => {
+            const subject = card.getAttribute('data-subject');
+            const grade = card.getAttribute('data-grade');
+            const title = card.getAttribute('data-title');
+            
+            const subjectMatch = !subjectValue || subject === subjectValue;
+            const gradeMatch = !gradeValue || grade === gradeValue;
+            const searchMatch = !searchValue || title.includes(searchValue);
+            
+            if (subjectMatch && gradeMatch && searchMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    subjectFilter.addEventListener('change', filterLessons);
+    gradeFilter.addEventListener('change', filterLessons);
+    searchInput.addEventListener('input', filterLessons);
+    
+    // تشغيل الفيديو في Modal
+    const watchButtons = document.querySelectorAll('.watch-video-btn');
+    const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+    const videoSource = document.getElementById('videoSource');
+    const lessonVideo = document.getElementById('lessonVideo');
+    const videoModalTitle = document.getElementById('videoModalTitle');
+    
+    watchButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const videoUrl = this.getAttribute('data-video');
+            const title = this.getAttribute('data-title');
+            
+            videoSource.src = videoUrl;
+            videoModalTitle.textContent = title;
+            lessonVideo.load();
+            videoModal.show();
+        });
+    });
+    
+    // إغلاق الفيديو عند إغلاق الـ Modal
+    document.getElementById('videoModal').addEventListener('hidden.bs.modal', function() {
+        lessonVideo.pause();
+    });
+});
+</script>
+{% endblock %}
