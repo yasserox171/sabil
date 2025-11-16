@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}الاختبارات التشخيصية - مركز Focus{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary">🎯 الاختبارات التشخيصية</h1>
+            <p class="text-muted">اختبر مستواك في مختلف المواد وحصل على تقرير مفصل</p>
+        </div>
+    </div>
+
+    <!-- فلترة الاختبارات -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select class="form-select" id="subjectFilter">
+                <option value="">جميع المواد</option>
+                <option value="الرياضيات">الرياضيات</option>
+                <option value="اللغة العربية">اللغة العربية</option>
+                <option value="الفيزياء">الفيزياء</option>
+                <option value="الفرنسية">اللغة الفرنسية</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="gradeFilter">
+                <option value="">جميع المستويات</option>
+                <option value="1ac">الإعدادي 1</option>
+                <option value="2ac">الإعدادي 2</option>
+                <option value="3ac">الإعدادي 3</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="ابحث في الاختبارات...">
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الاختبارات -->
+    <div class="row" id="testsContainer">
+        {% for test in tests %}
+        <div class="col-lg-6 col-md-12 mb-4 test-card" 
+             data-subject="{{ test.subject }}" 
+             data-grade="{{ test.grade_level }}"
+             data-title="{{ test.title.lower() }}">
+            <div class="card h-100 shadow-sm border-{% if test.subject == 'الرياضيات' %}primary{% elif test.subject == 'اللغة العربية' %}success{% else %}warning{% endif %}">
+                <div class="card-header bg-{% if test.subject == 'الرياضيات' %}primary{% elif test.subject == 'اللغة العربية' %}success{% else %}warning{% endif %} text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ test.title }}</h5>
+                        <span class="badge bg-light text-dark">
+                            {{ test.questions|length if test.questions else 0 }} أسئلة
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- معلومات الاختبار -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">
+                                <i class="fas fa-book"></i>
+                                {{ test.subject }}
+                            </small>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                {{ test.time_limit }} دقيقة
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- وصف الاختبار -->
+                    <p class="card-text">{{ test.description }}</p>
+                    
+                    <!-- مستوى الصف -->
+                    <div class="mb-3">
+                        <span class="badge bg-secondary">
+                            {% if test.grade_level == '1ac' %}الإعدادي 1
+                            {% elif test.grade_level == '2ac' %}الإعدادي 2
+                            {% elif test.grade_level == '3ac' %}الإعدادي 3
+                            {% else %}{{ test.grade_level }}{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- أزرار التنفيذ -->
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.take_test', test_id=test.id) }}" class="btn btn-primary">
+                            <i class="fas fa-play-circle"></i> بدء الاختبار
+                        </a>
+                        
+                        {% if test_results[test.id] %}
+                        <a href="{{ url_for('main.test_result', result_id=test_results[test.id].id) }}" 
+                           class="btn btn-outline-success">
+                            <i class="fas fa-chart-bar"></i> عرض النتيجة السابقة
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">لا توجد اختبارات متاحة حالياً</h4>
+                <p class="text-muted">سيتم إضافة الاختبارات التشخيصية قريباً</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// فلترة الاختبارات
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const gradeFilter = document.getElementById('gradeFilter');
+    const searchInput = document.getElementById('searchInput');
+    const testCards = document.querySelectorAll('.test-card');
+    
+    function filterTests() {
+        const subjectValue = subjectFilter.value;
+        const gradeValue = gradeFilter.value;
+        const searchValue = searchInput.value.toLowerCase();
+        
+        testCards.forEach(card => {
+            const subject = card.getAttribute('data-subject');
+            const grade = card.getAttribute('data-grade');
+            const title = card.getAttribute('data-title');
+            
+            const subjectMatch = !subjectValue || subject === subjectValue;
+            const gradeMatch = !gradeValue || grade === gradeValue;
+            const searchMatch = !searchValue || title.includes(searchValue);
+            
+            if (subjectMatch && gradeMatch && searchMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    subjectFilter.addEventListener('change', filterTests);
+    gradeFilter.addEventListener('change', filterTests);
+    searchInput.addEventListener('input', filterTests);
+});
+</script>
+{% endblock %}

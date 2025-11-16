@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}أداء الاختبار - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- رأس الاختبار -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ test.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <i class="fas fa-book fa-2x text-primary"></i>
+                            <p class="mb-0">{{ test.subject }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                            <p class="mb-0" id="timeDisplay">{{ test.time_limit }}:00</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-question-circle fa-2x text-success"></i>
+                            <p class="mb-0">{{ test.questions|length }} أسئلة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نموذج الاختبار -->
+            <form id="testForm">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">أسئلة الاختبار</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for question in test.get_questions() %}
+                        <div class="question-card mb-4 p-3 border rounded">
+                            <h6 class="question-text">
+                                <span class="badge bg-primary me-2">س {{ loop.index }}</span>
+                                {{ question.question }}
+                                <small class="text-muted">({{ question.points }} نقطة)</small>
+                            </h6>
+                            
+                            <div class="options-container mt-3">
+                                {% for option in question.options %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" 
+                                           name="question_{{ question.id }}" 
+                                           id="q{{ question.id }}_opt{{ loop.index0 }}"
+                                           value="{{ loop.index0 }}">
+                                    <label class="form-check-label" for="q{{ question.id }}_opt{{ loop.index0 }}">
+                                        {{ option }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane"></i> تسليم الاختبار
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let timeLeft = {{ test.time_limit * 60 }}; // تحويل إلى ثواني
+const timerElement = document.getElementById('timeDisplay');
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 0) {
+        submitTest();
+    } else {
+        timeLeft--;
+    }
+}
+
+// بدء المؤقت
+const timer = setInterval(updateTimer, 1000);
+updateTimer();
+
+// تسليم الاختبار
+document.getElementById('testForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitTest();
+});
+
+function submitTest() {
+    clearInterval(timer);
+    
+    const formData = new FormData(document.getElementById('testForm'));
+    const answers = {};
+    
+    for (let [key, value] of formData.entries()) {
+        answers[key.replace('question_', '')] = parseInt(value);
+    }
+    
+    const submissionData = {
+        answers: answers,
+        time_taken: {{ test.time_limit * 60 }} - timeLeft
+    };
+    
+    fetch("{{ url_for('main.submit_test', test_id=test.id) }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = "{{ url_for('main.test_result', result_id=0) }}".replace('0', data.result_id);
+        } else {
+            alert('حدث خطأ أثناء تسليم الاختبار: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ في الشبكة: ' + error);
+    });
+}
+</script>
+{% endblock %}
