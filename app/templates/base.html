@@ -17,6 +17,38 @@
                 <a class="nav-link" href="{{ url_for('main.diagnostic') }}">الاختبارات</a>
             </div>
         </div>
+        {% if current_user.is_authenticated %}
+            <li class="nav-item">
+                <span class="navbar-text me-3">مرحباً، {{ current_user.username }}</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.lessons') }}">
+                    <i class="fas fa-book"></i> الدروس
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.diagnostic') }}">
+                    <i class="fas fa-tasks"></i> الاختبارات
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{{ url_for('main.logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.login') }}">تسجيل الدخول</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.register') }}">إنشاء حساب</a>
+            </li>
+        {% endif %}
     </nav>
 
     <main class="container mt-4">

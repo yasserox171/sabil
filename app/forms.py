@@ -16,8 +16,9 @@ class RegisterForm(FlaskForm):
         ('1ac', 'الإعدادي 1'),
         ('2ac', 'الإعدادي 2'),
         ('3ac', 'الإعدادي 3'),
-        ('1bac', 'الثانوي 1'),
-        ('2bac', 'الثانوي 2')
+        ('TC', 'الثانوي 1'),
+        ('1bac', 'الثانوي 2'),
+        ('2bac', 'الثانوي 3')
     ], validators=[DataRequired()])
     submit = SubmitField('إنشاء حساب')
 

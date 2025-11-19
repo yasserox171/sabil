@@ -57,9 +57,7 @@ def register():
     # ✅ تمرير الفورم إلى القالب
     return render_template('register.html', form=form)
 
-@main_bp.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+
 
 
 
@@ -142,3 +140,22 @@ def submit_test(test_id):
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/dashboard')
+def dashboard():
+    # في المستقبل، سنمرر بيانات حقيقية من قاعدة البيانات
+    student_data = {
+        'username': 'طالب Focus',
+        'grade': 'الإعدادي 1',
+        'completed_lessons': 3,
+        'completed_tests': 2,
+        'average_score': 85,
+        'learning_hours': 12
+    }
+    return render_template('dashboard.html', student=student_data)
+
+@main_bp.route('/logout')
+def logout():
+    # TODO: تنفيذ تسجيل الخروج مع Flask-Login
+    flash('✅ تم تسجيل الخروج بنجاح', 'info')
+    return redirect(url_for('main.home'))

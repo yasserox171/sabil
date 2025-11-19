@@ -3,37 +3,205 @@
 {% block title %}لوحة التحكم - مركز Focus{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <h2>لوحة التحكم</h2>
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">الدروس المكتملة</h5>
-                        <p class="card-text display-6">3</p>
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">📊 لوحة التحكم</h1>
+                    <p class="text-muted">مرحباً بك، {{ student.username }} 👋</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6">{{ student.grade }}</span>
+                    <p class="text-muted mb-0">المستوى الحالي</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الإحصائيات -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">الدروس المكتملة</h5>
+                            <h2 class="text-primary">3</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book-open fa-2x text-primary"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">الاختبارات</h5>
-                        <p class="card-text display-6">2</p>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">الاختبارات المكتملة</h5>
+                            <h2 class="text-success">2</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">متوسط النتائج</h5>
+                            <h2 class="text-warning">85%</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">ساعات التعلم</h5>
+                            <h2 class="text-info">12</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x text-info"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>التحدي القادم</h5>
+
+    <div class="row">
+        <!-- التحدي القادم -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🎯 التحدي القادم</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6>اختبار الرياضيات - المستوى المتوسط</h6>
+                            <p class="text-muted mb-2">اختبر مهاراتك في الجبر والهندسة</p>
+                            <span class="badge bg-warning">30 دقيقة</span>
+                            <span class="badge bg-secondary">10 أسئلة</span>
+                        </div>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: 70%"></div>
+                    </div>
+                    <small class="text-muted">70% من الطلاب أكملوا هذا الاختبار</small>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{{ url_for('main.diagnostic') }}" class="btn btn-primary">ابدأ التحدي</a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <p>اختبار الرياضيات - المستوى المتوسط</p>
-                <a href="{{ url_for('main.diagnostic') }}" class="btn btn-primary">ابدأ الآن</a>
+        </div>
+
+        <!-- آخر النتائج -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📈 آخر النتائج</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">اختبار اللغة العربية</h6>
+                                <small class="text-muted">أداء اليوم</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">92%</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">اختبار الرياضيات</h6>
+                                <small class="text-muted">منذ يومين</small>
+                            </div>
+                            <span class="badge bg-warning rounded-pill">78%</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">اختبار الفيزياء</h6>
+                                <small class="text-muted">منذ أسبوع</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">65%</span>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{{ url_for('main.diagnostic') }}" class="btn btn-outline-success">عرض كل النتائج</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الدروس الموصى بها -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📚 الدروس الموصى بها لك</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-primary mb-2">الرياضيات</span>
+                                    <h6>الجبر المتقدم</h6>
+                                    <p class="text-muted small">تعمق في حل المعادلات المعقدة</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">🕒 25 دقيقة</small>
+                                        <a href="{{ url_for('main.lessons') }}" class="btn btn-sm btn-outline-primary">ابدأ</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-success mb-2">العربية</span>
+                                    <h6>النحو المتقدم</h6>
+                                    <p class="text-muted small">إتقان القواعد المعقدة</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">🕒 20 دقيقة</small>
+                                        <a href="{{ url_for('main.lessons') }}" class="btn btn-sm btn-outline-success">ابدأ</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-warning mb-2">الفيزياء</span>
+                                    <h6>القوانين الأساسية</h6>
+                                    <p class="text-muted small">فهم قوانين الحركة</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">🕒 30 دقيقة</small>
+                                        <a href="{{ url_for('main.lessons') }}" class="btn btn-sm btn-outline-warning">ابدأ</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
