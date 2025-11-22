@@ -9,17 +9,21 @@ def add_all_sample_data():
     with app.app_context():
         print("🚀 بدء إضافة البيانات التجريبية...")
         
-        # 1. إضافة طالب تجريبي
-        student = Student(
-            username='طالب_تجريبي',
-            email='student@focus.com',
-            password=generate_password_hash('123456'),
-            grade='1ac'
-        )
-        db.session.add(student)
-        print("✅ تم إضافة الطالب التجريبي")
+        # 1. التحقق من وجود الطالب التجريبي أولاً
+        existing_student = Student.query.filter_by(email='student@focus.com').first()
+        if not existing_student:
+            student = Student(
+                username='طالب_تجريبي',
+                email='student@focus.com',
+                password=generate_password_hash('123456'),
+                grade='1ac'
+            )
+            db.session.add(student)
+            print("✅ تم إضافة الطالب التجريبي")
+        else:
+            print("⚠️  الطالب التجريبي موجود مسبقاً")
         
-        # 2. إضافة الدروس التجريبية
+        # 2. إضافة الدروس التجريبية (إذا لم تكن موجودة)
         sample_lessons = [
             {
                 'title': 'الرياضيات - الجبر الأساسي',
@@ -50,12 +54,20 @@ def add_all_sample_data():
             }
         ]
         
+        lessons_added = 0
         for lesson_data in sample_lessons:
-            lesson = Lesson(**lesson_data)
-            db.session.add(lesson)
-        print("✅ تم إضافة الدروس التجريبية")
+            existing_lesson = Lesson.query.filter_by(title=lesson_data['title']).first()
+            if not existing_lesson:
+                lesson = Lesson(**lesson_data)
+                db.session.add(lesson)
+                lessons_added += 1
         
-        # 3. إضافة الاختبارات التجريبية
+        if lessons_added > 0:
+            print(f"✅ تم إضافة {lessons_added} درس تجريبي")
+        else:
+            print("⚠️  جميع الدروس موجودة مسبقاً")
+        
+        # 3. إضافة الاختبارات التجريبية (إذا لم تكن موجودة)
         sample_tests = [
             {
                 'title': 'اختبار الرياضيات التشخيصي - المستوى 1',
@@ -105,21 +117,35 @@ def add_all_sample_data():
             }
         ]
         
+        tests_added = 0
         for test_data in sample_tests:
-            questions = test_data.pop('questions')
-            test = DiagnosticTest(**test_data)
-            test.set_questions(questions)
-            db.session.add(test)
-        print("✅ تم إضافة الاختبارات التشخيصية")
+            existing_test = DiagnosticTest.query.filter_by(title=test_data['title']).first()
+            if not existing_test:
+                questions = test_data.pop('questions')
+                test = DiagnosticTest(**test_data)
+                test.set_questions(questions)
+                db.session.add(test)
+                tests_added += 1
+        
+        if tests_added > 0:
+            print(f"✅ تم إضافة {tests_added} اختبار تشخيصي")
+        else:
+            print("⚠️  جميع الاختبارات موجودة مسبقاً")
         
         # حفظ كل شيء
-        db.session.commit()
-        
-        print("\n🎉 تم إضافة جميع البيانات التجريبية بنجاح!")
-        print("📊 الإحصائيات:")
-        print(f"   - الطلاب: {Student.query.count()}")
-        print(f"   - الدروس: {Lesson.query.count()}") 
-        print(f"   - الاختبارات: {DiagnosticTest.query.count()}")
+        try:
+            db.session.commit()
+            print("\n🎉 تم تحديث قاعدة البيانات بنجاح!")
+            
+            # عرض الإحصائيات النهائية
+            print("📊 الإحصائيات النهائية:")
+            print(f"   - الطلاب: {Student.query.count()}")
+            print(f"   - الدروس: {Lesson.query.count()}") 
+            print(f"   - الاختبارات: {DiagnosticTest.query.count()}")
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ خطأ أثناء الحفظ: {e}")
 
 if __name__ == "__main__":
     add_all_sample_data()

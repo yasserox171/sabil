@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask_login import login_required, current_user, login_user, logout_user  # ⚠️ أضف هذا
 from .forms import RegisterForm, LoginForm
 from .models import Lesson, Student, DiagnosticTest, TestResult
 from . import db
@@ -14,32 +15,37 @@ def home():
 
 @main_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()  # ✅ إنشاء الفورم
+    # إذا كان المستخدم مسجل دخول بالفعل، توجيه للوحة التحكم
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    
+    form = LoginForm()
     
     if form.validate_on_submit():
-        # هنا سيأتي كود التحقق من تسجيل الدخول
         student = Student.query.filter_by(email=form.email.data).first()
         if student and check_password_hash(student.password, form.password.data):
+            login_user(student)  # ✅ تسجيل دخول المستخدم
             flash('✅ تم تسجيل الدخول بنجاح!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
             flash('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة', 'danger')
     
-    # ✅ تمرير الفورم إلى القالب
     return render_template('login.html', form=form)
 
 @main_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()  # ✅ إنشاء الفورم
+    # إذا كان المستخدم مسجل دخول بالفعل، توجيه للوحة التحكم
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    
+    form = RegisterForm()
     
     if form.validate_on_submit():
-        # التحقق من عدم وجود مستخدم بنفس البريد
         existing_user = Student.query.filter_by(email=form.email.data).first()
         if existing_user:
             flash('❌ هذا البريد الإلكتروني مسجل بالفعل!', 'danger')
             return redirect(url_for('main.register'))
         
-        # إنشاء مستخدم جديد
         hashed_password = generate_password_hash(form.password.data)
         new_student = Student(
             username=form.username.data,
@@ -51,15 +57,13 @@ def register():
         db.session.add(new_student)
         db.session.commit()
         
-        flash('✅ تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success')
-        return redirect(url_for('main.login'))
+        # ✅ تسجيل دخول تلقائي بعد التسجيل
+        login_user(new_student)
+        
+        flash('✅ تم إنشاء الحساب بنجاح!', 'success')
+        return redirect(url_for('main.dashboard'))
     
-    # ✅ تمرير الفورم إلى القالب
     return render_template('register.html', form=form)
-
-
-
-
 
 
 @main_bp.route('/result')
@@ -140,17 +144,20 @@ def submit_test(test_id):
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
 @main_bp.route('/dashboard')
+@login_required  # ✅ أضف هذا الديكوراتور
 def dashboard():
-    # في المستقبل، سنمرر بيانات حقيقية من قاعدة البيانات
+    student = current_user
+    # إحصائيات حقيقية (يمكن تطويرها لاحقاً)
+    completed_tests = TestResult.query.filter_by(student_id=student.id).count()
+    
     student_data = {
-        'username': 'طالب Focus',
-        'grade': 'الإعدادي 1',
-        'completed_lessons': 3,
-        'completed_tests': 2,
-        'average_score': 85,
-        'learning_hours': 12
+        'username': student.username,
+        'grade': student.grade,
+        'completed_lessons': 3,  # مؤقت - سنطوره لاحقاً
+        'completed_tests': completed_tests,
+        'average_score': 85,     # مؤقت - سنطوره لاحقاً
+        'learning_hours': 12     # مؤقت - سنطوره لاحقاً
     }
     return render_template('dashboard.html', student=student_data)
 
