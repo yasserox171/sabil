@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}أداء الاختبار - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- رأس الاختبار -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ test.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <i class="fas fa-book fa-2x text-primary"></i>
+                            <p class="mb-0">{{ test.subject }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                            <p class="mb-0" id="timeDisplay">{{ test.time_limit }}:00</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fas fa-question-circle fa-2x text-success"></i>
+                            <p class="mb-0">{{ test.questions|length }} أسئلة</p>
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fas fa-brain fa-2x text-info"></i>
+                            <p class="mb-0" id="progressDisplay">0/{{ test.questions|length }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نموذج الاختبار -->
+            <form id="testForm">
+                {% for question in test.get_questions() %}
+                <div class="question-card mb-4 p-4 border rounded" data-question-id="{{ question.id }}">
+                    <!-- رأس السؤال -->
+                    <div class="question-header mb-3">
+                        <h5 class="question-text">
+                            <span class="badge bg-primary me-2">س {{ loop.index }}</span>
+                            {{ question.question }}
+                            <small class="text-muted">({{ question.points }} نقطة)</small>
+                        </h5>
+                        <span class="badge bg-secondary">
+                            {% if question.type == 'multiple_choice' %}🧩 متعدد الاختيارات
+                            {% elif question.type == 'true_false' %}✅ صح/خطأ
+                            {% elif question.type == 'fill_blank' %}📝 ملء فراغ
+                            {% elif question.type == 'matching' %}🔗 توصيل
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- محتوى السؤال حسب النوع -->
+                    <div class="question-content">
+                        {% if question.type == 'multiple_choice' %}
+                        <div class="options-container">
+                            {% for option in question.options %}
+                            <div class="form-check mb-3 p-3 border rounded option-item">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ question.id }}" 
+                                       id="q{{ question.id }}_opt{{ loop.index0 }}"
+                                       value="{{ loop.index0 }}"
+                                       onchange="updateProgress()">
+                                <label class="form-check-label fs-6" for="q{{ question.id }}_opt{{ loop.index0 }}">
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% elif question.type == 'true_false' %}
+                        <div class="options-container">
+                            <div class="form-check mb-3 p-3 border rounded option-item">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ question.id }}" 
+                                       id="q{{ question.id }}_true"
+                                       value="true"
+                                       onchange="updateProgress()">
+                                <label class="form-check-label fs-6 text-success" for="q{{ question.id }}_true">
+                                    ✅ صح
+                                </label>
+                            </div>
+                            <div class="form-check mb-3 p-3 border rounded option-item">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ question.id }}" 
+                                       id="q{{ question.id }}_false"
+                                       value="false"
+                                       onchange="updateProgress()">
+                                <label class="form-check-label fs-6 text-danger" for="q{{ question.id }}_false">
+                                    ❌ خطأ
+                                </label>
+                            </div>
+                        </div>
+                        
+                        {% elif question.type == 'fill_blank' %}
+                        <div class="fill-blank-container">
+                            <div class="mb-3">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="question_{{ question.id }}"
+                                       placeholder="اكتب إجابتك هنا..."
+                                       oninput="updateProgress()">
+                                {% if question.hint %}
+                                <small class="text-muted mt-2 d-block">
+                                    💡 تلميح: {{ question.hint }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% elif question.type == 'matching' %}
+                        <div class="matching-container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary">العناصر اليسرى:</h6>
+                                    <ul class="list-group">
+                                        {% for left_item in question.left_items %}
+                                        <li class="list-group-item">
+                                            <strong>{{ loop.index0 }}.</strong> {{ left_item }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success">العناصر اليمنى:</h6>
+                                    <ul class="list-group">
+                                        {% for right_item in question.right_items %}
+                                        <li class="list-group-item">
+                                            <strong>{{ loop.index0 }}.</strong> {{ right_item }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <h6 class="text-info">قم بالتوصيل:</h6>
+                                {% for left_index in range(question.left_items|length) %}
+                                <div class="row mb-2 align-items-center">
+                                    <div class="col-md-4">
+                                        <span class="badge bg-primary">{{ left_index }}. {{ question.left_items[left_index] }}</span>
+                                    </div>
+                                    <div class="col-md-1 text-center">→</div>
+                                    <div class="col-md-7">
+                                        <select class="form-select" name="question_{{ question.id }}_match_{{ left_index }}" onchange="updateProgress()">
+                                            <option value="">اختر التوصيل</option>
+                                            {% for right_index in range(question.right_items|length) %}
+                                            <option value="{{ right_index }}">{{ right_index }}. {{ question.right_items[right_index] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- زر التسليم -->
+                <div class="card mt-4">
+                    <div class="card-footer text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-paper-plane"></i> تسليم الاختبار
+                        </button>
+                        <div class="mt-2">
+                            <small class="text-muted" id="completionStatus">لم تجب على أي سؤال بعد</small>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let timeLeft = {{ test.time_limit * 60 }};
+const timerElement = document.getElementById('timeDisplay');
+const progressElement = document.getElementById('progressDisplay');
+const completionElement = document.getElementById('completionStatus');
+const totalQuestions = {{ test.questions|length }};
+
+// تحديث المؤقت
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 0) {
+        submitTest();
+    } else {
+        timeLeft--;
+    }
+}
+
+// تحديث التقدم
+function updateProgress() {
+    let answered = 0;
+    
+    // حساب الأسئلة المجابة
+    document.querySelectorAll('.question-card').forEach(card => {
+        const questionId = card.dataset.questionId;
+        const questionType = card.querySelector('.badge.bg-secondary').textContent.trim();
+        
+        let isAnswered = false;
+        
+        if (questionType.includes('متعدد') || questionType.includes('صح/خطأ')) {
+            isAnswered = card.querySelector('input[type="radio"]:checked') !== null;
+        } else if (questionType.includes('ملء فراغ')) {
+            isAnswered = card.querySelector('input[type="text"]').value.trim() !== '';
+        } else if (questionType.includes('توصيل')) {
+            const allSelected = card.querySelectorAll('select');
+            isAnswered = Array.from(allSelected).every(select => select.value !== '');
+        }
+        
+        if (isAnswered) answered++;
+    });
+    
+    progressElement.textContent = `${answered}/${totalQuestions}`;
+    
+    // تحديث حالة الإكمال
+    if (answered === 0) {
+        completionElement.textContent = 'لم تجب على أي سؤال بعد';
+        completionElement.className = 'text-muted';
+    } else if (answered === totalQuestions) {
+        completionElement.textContent = '🎉 أجبت على جميع الأسئلة!';
+        completionElement.className = 'text-success fw-bold';
+    } else {
+        completionElement.textContent = `أجبت على ${answered} من ${totalQuestions} أسئلة`;
+        completionElement.className = 'text-warning';
+    }
+}
+
+// بدء المؤقت
+const timer = setInterval(updateTimer, 1000);
+updateTimer();
+
+// تسليم الاختبار
+document.getElementById('testForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitTest();
+});
+
+function submitTest() {
+    clearInterval(timer);
+    
+    const formData = new FormData(document.getElementById('testForm'));
+    const answers = {};
+    
+    // جمع إجابات الأسئلة العادية
+    for (let [key, value] of formData.entries()) {
+        if (key.startsWith('question_') && !key.includes('_match_')) {
+            answers[key.replace('question_', '')] = value;
+        }
+    }
+    
+    // جمع إجابات أسئلة التوصيل
+    const matchingAnswers = {};
+    document.querySelectorAll('select[name^="question_"]').forEach(select => {
+        const matchKey = select.name;
+        matchingAnswers[matchKey] = select.value;
+    });
+    
+    const submissionData = {
+        answers: answers,
+        matching_answers: matchingAnswers,
+        time_taken: {{ test.time_limit * 60 }} - timeLeft
+    };
+    
+    fetch("{{ url_for('main.submit_test', test_id=test.id) }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = "{{ url_for('main.test_result', result_id=0) }}".replace('0', data.result_id);
+        } else {
+            alert('حدث خطأ أثناء تسليم الاختبار: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ في الشبكة: ' + error);
+    });
+}
+
+// التهيئة الأولية
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+});
+</script>
+
+<style>
+.question-card {
+    background: #f8f9fa;
+    border-left: 4px solid #0d6efd !important;
+}
+
+.option-item:hover {
+    background: #e9ecef;
+    cursor: pointer;
+}
+
+.option-item .form-check-input:checked + .form-check-label {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.matching-container .row {
+    margin-bottom: 10px;
+}
+
+.fill-blank-container input {
+    font-size: 1.1rem;
+    padding: 12px;
+}
+</style>
+{% endblock %}

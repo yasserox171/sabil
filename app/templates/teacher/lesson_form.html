@@ -1,0 +1,81 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}{{ title }} - المدرب{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.title.label(class="form-label") }}
+                                {{ form.title(class="form-control") }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.title.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.subject.label(class="form-label") }}
+                                {{ form.subject(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.grade_level.label(class="form-label") }}
+                                {{ form.grade_level(class="form-select") }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.duration.label(class="form-label") }}
+                                {{ form.duration(class="form-control", placeholder="مثال: 15:30") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="4") }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.video_url.label(class="form-label") }}
+                                {{ form.video_url(class="form-control", placeholder="رابط الفيديو (اختياري)") }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.document_url.label(class="form-label") }}
+                                {{ form.document_url(class="form-control", placeholder="رابط المستند (اختياري)") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form.is_published(class="form-check-input") }}
+                            {{ form.is_published.label(class="form-check-label") }}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('teacher.teacher_lessons_management') }}" class="btn btn-secondary me-md-2">                                <i class="fas fa-arrow-left"></i> رجوع
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}اللوحة الرئيسية - المدرب{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">👨‍🏫 لوحة تحكم المدرب</h1>
+                    <p class="text-muted">مرحباً بك، {{ current_user.username }}</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success fs-6">مدرب</span>
+                    <p class="text-muted mb-0">دورك الحالي</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقات الإحصائيات -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">الدروس</h5>
+                            <h2 class="text-primary">{{ stats.total_lessons }}</h2>
+                            <small class="text-muted">{{ stats.published_lessons }} منشور</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book-open fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">الاختبارات</h5>
+                            <h2 class="text-success">{{ stats.total_tests }}</h2>
+                            <small class="text-muted">{{ stats.published_tests }} منشور</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">الطلاب</h5>
+                            <h2 class="text-warning">{{ stats.total_students }}</h2>
+                            <small class="text-muted">طالب مسجل</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title text-muted">النتائج</h5>
+                            <h2 class="text-info">{{ stats.total_results }}</h2>
+                            <small class="text-muted">اختبار مكتمل</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإجراءات السريعة -->
+    <!-- الإجراءات السريعة -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🚀 إجراءات سريعة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('teacher.teacher_new_lesson') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus-circle"></i> إنشاء درس جديد
+                        </a>
+                        <a href="{{ url_for('teacher.teacher_new_test') }}" class="btn btn-warning btn-lg">
+                            <i class="fas fa-plus-circle"></i> إنشاء اختبار جديد
+                        </a>
+                        <a href="{{ url_for('teacher.teacher_view_results') }}" class="btn btn-info btn-lg">
+                            <i class="fas fa-chart-bar"></i> عرض النتائج
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- آخر النشاطات -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📈 آخر النشاطات</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">تم إنشاء درس جديد</h6>
+                                <small class="text-muted">الرياضيات - الجبر المتقدم</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">جديد</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">طالب أكمل اختبار</h6>
+                                <small class="text-muted">اللغة العربية - 85%</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">مكتمل</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">تم نشر اختبار</h6>
+                                <small class="text-muted">الفيزياء - المستوى 2</small>
+                            </div>
+                            <span class="badge bg-warning rounded-pill">منشور</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

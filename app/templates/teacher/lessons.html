@@ -1,0 +1,107 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}إدارة الدروس - المدرب{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">📚 إدارة الدروس</h1>
+                    <p class="text-muted">إدارة وعرض جميع الدروس التي قمت بإنشائها</p>
+                </div>
+                <a href="{{ url_for('teacher.teacher_new_lesson') }}" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> إنشاء درس جديد
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول الدروس -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">قائمة الدروس</h5>
+        </div>
+        <div class="card-body">
+            {% if lessons %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>العنوان</th>
+                            <th>المادة</th>
+                            <th>المستوى</th>
+                            <th>المدة</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in lessons %}
+                        <tr>
+                            <td>
+                                <strong>{{ lesson.title }}</strong>
+                                {% if lesson.description %}
+                                <br><small class="text-muted">{{ lesson.description[:50] }}...</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ lesson.subject }}</span>
+                            </td>
+                            <td>
+                                {% if lesson.grade_level == '1ac' %}الإعدادي 1
+                                {% elif lesson.grade_level == '2ac' %}الإعدادي 2
+                                {% elif lesson.grade_level == '3ac' %}الإعدادي 3
+                                {% else %}{{ lesson.grade_level }}{% endif %}
+                            </td>
+                            <td>{{ lesson.duration }}</td>
+                            <td>
+                                {% if lesson.is_published %}
+                                <span class="badge bg-success">منشور</span>
+                                {% else %}
+                                <span class="badge bg-warning">مسودة</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ lesson.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('teacher.teacher_edit_lesson', lesson_id=lesson.id) }}" 
+                                    class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if lesson.is_published %}
+                                    <a href="#" class="btn btn-outline-warning">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="#" class="btn btn-outline-success">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="#" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">لا توجد دروس</h4>
+                <p class="text-muted">ابدأ بإنشاء أول درس لك</p>
+                <a href="{{ url_for('teacher.teacher_new_lesson') }}" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> إنشاء درس جديد
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

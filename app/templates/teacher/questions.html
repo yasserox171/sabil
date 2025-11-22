@@ -1,0 +1,313 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}إدارة الأسئلة - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">❓ إدارة الأسئلة</h1>
+                    <p class="text-muted">{{ test.title }} - {{ questions|length }} سؤال</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('teacher.teacher_tests_management') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> رجوع للاختبارات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- نموذج إضافة سؤال -->
+        <div class="col-lg-5 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> إضافة سؤال جديد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="questionForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- نوع السؤال -->
+                        <div class="mb-3">
+                            {{ form.question_type.label(class="form-label") }}
+                            {{ form.question_type(class="form-select", id="questionType") }}
+                        </div>
+
+                        <!-- السؤال والنقاط -->
+                        <div class="mb-3">
+                            {{ form.question.label(class="form-label") }}
+                            {{ form.question(class="form-control", rows="3", placeholder="اكتب السؤال هنا...") }}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.points.label(class="form-label") }}
+                                {{ form.points(class="form-control", type="number", min="1") }}
+                            </div>
+                        </div>
+
+                        <!-- متعدد الاختيارات -->
+                        <div id="multipleChoiceFields" class="question-fields">
+                            <h6 class="text-primary mb-3">🧩 متعدد الاختيارات</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    {{ form.option1.label(class="form-label") }}
+                                    {{ form.option1(class="form-control", placeholder="الاختيار الأول") }}
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    {{ form.option2.label(class="form-label") }}
+                                    {{ form.option2(class="form-control", placeholder="الاختيار الثاني") }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    {{ form.option3.label(class="form-label") }}
+                                    {{ form.option3(class="form-control", placeholder="الاختيار الثالث") }}
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    {{ form.option4.label(class="form-label") }}
+                                    {{ form.option4(class="form-control", placeholder="الاختيار الرابع") }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.correct_choice.label(class="form-label") }}
+                                {{ form.correct_choice(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <!-- صح/خطأ -->
+                        <div id="trueFalseFields" class="question-fields" style="display: none;">
+                            <h6 class="text-primary mb-3">✅ صح/خطأ</h6>
+                            <div class="mb-3">
+                                {{ form.correct_bool.label(class="form-label") }}
+                                {{ form.correct_bool(class="form-select") }}
+                            </div>
+                        </div>
+
+                        <!-- ملء الفراغ -->
+                        <div id="fillBlankFields" class="question-fields" style="display: none;">
+                            <h6 class="text-primary mb-3">📝 ملء الفراغ</h6>
+                            <div class="mb-3">
+                                {{ form.correct_text.label(class="form-label") }}
+                                {{ form.correct_text(class="form-control", placeholder="الإجابة الصحيحة") }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.hint_text.label(class="form-label") }}
+                                {{ form.hint_text(class="form-control", placeholder="تلميح للطالب (اختياري)") }}
+                            </div>
+                        </div>
+
+                        <!-- التوصيل -->
+                        <div id="matchingFields" class="question-fields" style="display: none;">
+                            <h6 class="text-primary mb-3">🔗 أسئلة التوصيل</h6>
+                            <div class="mb-3">
+                                {{ form.left_items.label(class="form-label") }}
+                                {{ form.left_items(class="form-control", rows="3", placeholder="اكتب العناصر اليسرى...\nمثال:\nالعاصمة\nالعملة\nاللغة") }}
+                                <small class="text-muted">اكتب كل عنصر في سطر جديد</small>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.right_items.label(class="form-label") }}
+                                {{ form.right_items(class="form-control", rows="3", placeholder="اكتب العناصر اليمنى...\nمثال:\nالرياض\nالريال\nالعربية") }}
+                                <small class="text-muted">اكتب كل عنصر في سطر جديد</small>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.correct_matches.label(class="form-label") }}
+                                {{ form.correct_matches(class="form-control", rows="3", placeholder="اكتب التوصيلات الصحيحة...\nمثال:\n0-0\n1-1\n2-2") }}
+                                <small class="text-muted">اكتب كل توصيل في سطر جديد بالشكل: رقم_يساري-رقم_يميني</small>
+                            </div>
+                        </div>
+
+                        <!-- شرح الإجابة -->
+                        <div class="mb-3">
+                            {{ form.explanation.label(class="form-label") }}
+                            {{ form.explanation(class="form-control", rows="2", placeholder="شرح مفصل للإجابة (سيظهر للطالب بعد الإجابة)...") }}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الأسئلة -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> أسئلة الاختبار
+                        <span class="badge bg-light text-dark ms-2">{{ questions|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                    <div class="list-group">
+                        {% for question in questions %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <!-- رأس السؤال -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">
+                                            <span class="badge bg-primary me-2">س {{ loop.index }}</span>
+                                            {{ question.question }}
+                                        </h6>
+                                        <div>
+                                            <span class="badge bg-info me-1">{{ question.points }} نقطة</span>
+                                            <span class="badge bg-secondary">
+                                                {% if question.type == 'multiple_choice' %}🧩 متعدد
+                                                {% elif question.type == 'true_false' %}✅ صح/خطأ
+                                                {% elif question.type == 'fill_blank' %}📝 ملء فراغ
+                                                {% elif question.type == 'matching' %}🔗 توصيل
+                                                {% else %}❓ آخر{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- محتوى السؤال حسب النوع -->
+                                    {% if question.type == 'multiple_choice' %}
+                                    <div class="mt-2">
+                                        {% for option in question.options %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   {% if loop.index0 == question.correct_answer %}checked{% endif %} disabled>
+                                            <label class="form-check-label {% if loop.index0 == question.correct_answer %}text-success fw-bold{% endif %}">
+                                                {{ option }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    {% elif question.type == 'true_false' %}
+                                    <div class="mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   {% if question.correct_answer %}checked{% endif %} disabled>
+                                            <label class="form-check-label {% if question.correct_answer %}text-success fw-bold{% endif %}">
+                                                صح
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   {% if not question.correct_answer %}checked{% endif %} disabled>
+                                            <label class="form-check-label {% if not question.correct_answer %}text-success fw-bold{% endif %}">
+                                                خطأ
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    {% elif question.type == 'fill_blank' %}
+                                    <div class="mt-2">
+                                        <div class="alert alert-info">
+                                            <strong>الإجابة الصحيحة:</strong> {{ question.correct_answer }}
+                                            {% if question.hint %}
+                                            <br><strong>تلميح:</strong> {{ question.hint }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% elif question.type == 'matching' %}
+                                    <div class="mt-2">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <strong>اليسار:</strong>
+                                                <ul class="list-unstyled">
+                                                    {% for item in question.left_items %}
+                                                    <li>{{ loop.index0 }}. {{ item }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong>اليمين:</strong>
+                                                <ul class="list-unstyled">
+                                                    {% for item in question.right_items %}
+                                                    <li>{{ loop.index0 }}. {{ item }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- شرح الإجابة -->
+                                    {% if question.explanation %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <strong>شرح:</strong> {{ question.explanation }}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="btn-group btn-group-sm ms-3">
+                                    <a href="{{ url_for('teacher.teacher_delete_question', test_id=test.id, question_id=question.id) }}" 
+                                       class="btn btn-outline-danger btn-sm" 
+                                       onclick="return confirm('هل أنت متأكد من حذف هذا السؤال؟')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-question-circle fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">لا توجد أسئلة بعد</p>
+                        <p class="text-muted small">ابدأ بإضافة أول سؤال للاختبار</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// إظهار/إخفاء الحقول حسب نوع السؤال
+document.getElementById('questionType').addEventListener('change', function() {
+    const type = this.value;
+    
+    // إخفاء جميع الحقول أولاً
+    document.querySelectorAll('.question-fields').forEach(field => {
+        field.style.display = 'none';
+    });
+    
+    // إظهار الحقول المناسبة
+    if (type === 'multiple_choice') {
+        document.getElementById('multipleChoiceFields').style.display = 'block';
+    } else if (type === 'true_false') {
+        document.getElementById('trueFalseFields').style.display = 'block';
+    } else if (type === 'fill_blank') {
+        document.getElementById('fillBlankFields').style.display = 'block';
+    } else if (type === 'matching') {
+        document.getElementById('matchingFields').style.display = 'block';
+    }
+});
+
+// تهيئة الحقول عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('questionType').dispatchEvent(new Event('change'));
+});
+</script>
+
+<style>
+.question-fields {
+    border-right: 3px solid #0d6efd;
+    padding-right: 15px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

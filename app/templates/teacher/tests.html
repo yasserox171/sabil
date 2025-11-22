@@ -1,0 +1,114 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}إدارة الاختبارات - المدرب{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">🎯 إدارة الاختبارات</h1>
+                    <p class="text-muted">إدارة وعرض جميع الاختبارات التي قمت بإنشائها</p>
+                </div>
+                <a href="{{ url_for('teacher.teacher_new_test') }}" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> إنشاء اختبار جديد
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول الاختبارات -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">قائمة الاختبارات</h5>
+        </div>
+        <div class="card-body">
+            {% if tests %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>العنوان</th>
+                            <th>المادة</th>
+                            <th>المستوى</th>
+                            <th>الوقت</th>
+                            <th>الأسئلة</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
+                        <tr>
+                            <td>
+                                <strong>{{ test.title }}</strong>
+                                {% if test.description %}
+                                <br><small class="text-muted">{{ test.description[:50] }}...</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ test.subject }}</span>
+                            </td>
+                            <td>
+                                {% if test.grade_level == '1ac' %}الإعدادي 1
+                                {% elif test.grade_level == '2ac' %}الإعدادي 2
+                                {% elif test.grade_level == '3ac' %}الإعدادي 3
+                                {% else %}{{ test.grade_level }}{% endif %}
+                            </td>
+                            <td>{{ test.time_limit }} دقيقة</td>
+                            <td>
+                                <span class="badge bg-info">{{ test.get_questions()|length }}</span>
+                            </td>
+                            <td>
+                                {% if test.is_published %}
+                                <span class="badge bg-success">منشور</span>
+                                {% else %}
+                                <span class="badge bg-warning">مسودة</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ test.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('teacher.teacher_manage_questions', test_id=test.id) }}" 
+                                       class="btn btn-outline-info" title="إدارة الأسئلة">
+                                        <i class="fas fa-question-circle"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if test.is_published %}
+                                    <a href="#" class="btn btn-outline-warning" title="إلغاء النشر">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="#" class="btn btn-outline-success" title="نشر">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="#" class="btn btn-outline-danger" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">لا توجد اختبارات</h4>
+                <p class="text-muted">ابدأ بإنشاء أول اختبار لك</p>
+                <a href="{{ url_for('teacher.teacher_new_test') }}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> إنشاء اختبار جديد
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,18 +14,20 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'main.login'
     
-    # مستخدم افتراضي للاختبار
     @login_manager.user_loader
     def load_user(user_id):
-        from .models import Student
-        return Student.query.get(int(user_id)) if user_id else None
+        from .models import User  # ✅ تأكد من أن هذا هو User وليس Student
+        return User.query.get(int(user_id)) if user_id else None
     
     @app.context_processor
     def inject_user():
         return dict(current_user=current_user)
     
-    from . import routes, auth_routes
+    # ✅ تسجيل الـ Blueprints
+    from . import routes
+    from . import teacher_routes
+    
     app.register_blueprint(routes.main_bp)
-    app.register_blueprint(auth_routes.auth_bp)
+    app.register_blueprint(teacher_routes.teacher_bp)
     
     return app

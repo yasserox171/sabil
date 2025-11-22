@@ -1,0 +1,89 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}قائمة الطلاب - المدرب{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="text-primary">👥 قائمة الطلاب</h1>
+                    <p class="text-muted">عرض وإدارة جميع الطلاب المسجلين في النظام</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول الطلاب -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">الطلاب المسجلين</h5>
+        </div>
+        <div class="card-body">
+            {% if students %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>اسم المستخدم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>المستوى</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>الاختبارات المكتملة</th>
+                            <th>متوسط النتائج</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>
+                                <strong>{{ student.username }}</strong>
+                            </td>
+                            <td>{{ student.email }}</td>
+                            <td>
+                                {% if student.grade == '1ac' %}الإعدادي 1
+                                {% elif student.grade == '2ac' %}الإعدادي 2
+                                {% elif student.grade == '3ac' %}الإعدادي 3
+                                {% else %}{{ student.grade }}{% endif %}
+                            </td>
+                            <td>{{ student.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ student.test_results|length }}</span>
+                            </td>
+                            <td>
+                                {% if student.test_results %}
+                                {% set avg_score = student.test_results|selectattr('score')|map('float')|list %}
+                                <strong>{{ (avg_score|sum / avg_score|length)|round(1) }}%</strong>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-info" title="عرض النتائج">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary" title="إرسال رسالة">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">لا توجد طلاب مسجلين</h4>
+                <p class="text-muted">سيظهر هنا الطلاب عند تسجيلهم في النظام</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
